@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/types/database'
+import Avatar from '@/components/Avatar'
 
 interface UsersTableProps {
   limit?: number
@@ -120,9 +121,12 @@ export default function UsersTable({ limit }: UsersTableProps) {
               >
                 <td className="py-4 pr-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-bro-500 to-bro-600 rounded-full flex items-center justify-center font-semibold">
-                      {(user.username || 'U').charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar
+                      username={user.username}
+                      telegramId={user.telegram_id}
+                      profilePicture={user.profile_picture}
+                      size="md"
+                    />
                     <div>
                       <div className="font-medium">{user.username || 'Unknown'}</div>
                       <div className="text-sm text-gray-500">{user.telegram_id}</div>
