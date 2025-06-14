@@ -9,7 +9,7 @@ interface UsersTableProps {
   limit?: number
 }
 
-type UserWithTiers = Tables<'users'> & {
+type UserWithTiers = Pick<Tables<'users'>, 'telegram_id' | 'username' | 'profile_picture' | 'created_at'> & {
   user_tiers: Tables<'user_tiers'> | null
 }
 
@@ -31,7 +31,10 @@ export default function UsersTable({ limit }: UsersTableProps) {
       const { data, error } = await supabase
         .from('users')
         .select(`
-          *,
+          telegram_id,
+          username,
+          profile_picture,
+          created_at,
           user_tiers (*)
         `)
         .order('created_at', { ascending: false })
@@ -116,7 +119,7 @@ export default function UsersTable({ limit }: UsersTableProps) {
           <tbody>
             {users.map((user) => (
               <tr 
-                key={user.id} 
+                key={user.telegram_id} 
                 className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
               >
                 <td className="py-4 pr-4">
@@ -147,7 +150,7 @@ export default function UsersTable({ limit }: UsersTableProps) {
                   </span>
                 </td>
                 <td className="py-4 text-sm text-gray-400">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                 </td>
               </tr>
             ))}

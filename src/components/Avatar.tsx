@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 interface AvatarProps {
   username?: string | null
-  telegramId: string
+  telegramId: string | null
   profilePicture?: string | null
   size?: 'sm' | 'md' | 'lg'
 }
@@ -23,8 +23,9 @@ export default function Avatar({ username, telegramId, profilePicture, size = 'm
     
     // Create a hash from telegram ID
     let hash = 0
-    for (let i = 0; i < telegramId.length; i++) {
-      hash = ((hash << 5) - hash) + telegramId.charCodeAt(i)
+    const idStr = telegramId || 'default'
+    for (let i = 0; i < idStr.length; i++) {
+      hash = ((hash << 5) - hash) + idStr.charCodeAt(i)
       hash = hash & hash
     }
     
