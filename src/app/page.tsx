@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Tables } from '@/types/database'
-import Sidebar from '@/components/Sidebar'
 import MetricsGrid from '@/components/MetricsGrid'
 import UserSegments from '@/components/UserSegments'
 import ActivityChart from '@/components/ActivityChart'
 import UsersTable from '@/components/UsersTable'
 
 export default function Dashboard() {
-  const [currentView, setCurrentView] = useState('dashboard')
   const [metrics, setMetrics] = useState({
     totalUsers: 0,
     totalBits: 0,
@@ -61,36 +58,23 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-dark-primary">
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
-      
-      <main className="flex-1 overflow-y-auto">
-        <header className="bg-dark-secondary border-b border-white/5 px-8 py-6">
-          <h1 className="text-2xl font-semibold">
-            {currentView === 'dashboard' && 'Dashboard Overview'}
-            {currentView === 'users' && 'User Management'}
-            {currentView === 'analytics' && 'Analytics'}
-            {currentView === 'referrals' && 'Referral Network'}
-          </h1>
-        </header>
+    <div className="p-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+        <p className="text-gray-400 mt-2">Welcome to your BRO Admin Dashboard</p>
+      </header>
 
-        <div className="p-8">
-          {currentView === 'dashboard' && (
-            <>
-              <MetricsGrid metrics={metrics} loading={loading} />
-              <UserSegments />
-              <ActivityChart />
-              <UsersTable limit={10} />
-            </>
-          )}
-          
-          {currentView === 'users' && (
-            <UsersTable />
-          )}
-          
-          {/* Other views to be implemented */}
+      <div className="space-y-6">
+        <MetricsGrid metrics={metrics} loading={loading} />
+        <UserSegments />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActivityChart />
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Recent Users</h2>
+            <UsersTable limit={5} />
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
