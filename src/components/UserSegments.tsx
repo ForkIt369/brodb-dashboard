@@ -44,11 +44,11 @@ export default function UserSegments() {
       
       const { data: activeData } = await supabase
         .from('raw_earnings')
-        .select('user_id')
-        .gte('created_at', sevenDaysAgo.toISOString())
+        .select('telegram_id')
+        .gte('earned_at', sevenDaysAgo.toISOString())
         .limit(1000)
 
-      const activeCount = new Set(activeData?.map(r => r.user_id) || []).size
+      const activeCount = new Set(activeData?.map(r => r.telegram_id) || []).size
 
       setSegments([
         { name: 'Whales', icon: '🐋', count: whalesCount || 0, color: 'bro' },
