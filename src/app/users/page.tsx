@@ -12,7 +12,7 @@ import {
   Calendar, TrendingUp, Zap, Users, Shield, AlertTriangle, 
   Globe, Smartphone, Clock, Award, DollarSign, UserCheck,
   BarChart3, Activity, Target, Link2, Hash, Mail, Send,
-  Tag, Ban, CheckCircle, XCircle, ChevronRight
+  Tag, Ban, CheckCircle, XCircle, ChevronRight, Download
 } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -729,7 +729,7 @@ export default function UsersPage() {
 
   // Apply column visibility
   const visibleColumns = columns.filter(col => {
-    const colId = col.id || col.accessorKey
+    const colId = col.id || (col as any).accessorKey
     if (!colId || colId === 'actions') return true
     return columnVisibility[colId as keyof typeof columnVisibility] !== false
   })

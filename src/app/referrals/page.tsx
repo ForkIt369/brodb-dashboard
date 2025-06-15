@@ -166,6 +166,7 @@ export default function ReferralsPage() {
 
     const referredIds = referredUsers?.map(r => r.referred_id) || []
     
+    let activeReferralRate = 0
     if (referredIds.length > 0) {
       const { data: activeReferrals } = await supabase
         .from('raw_earnings')
@@ -174,18 +175,21 @@ export default function ReferralsPage() {
         .gte('earned_at', sevenDaysAgo.toISOString())
 
       const activeCount = new Set(activeReferrals?.map(r => r.telegram_id) || []).size
-      const activeReferralRate = (activeCount / referredIds.length) * 100
+      activeReferralRate = (activeCount / referredIds.length) * 100
+    }
 
-      setStats({
-        totalReferrers: referrerCount || 0,
-        totalReferred: referredCount || 0,
-        totalReferralEarnings,
-        avgReferralsPerUser: Math.round(avgReferralsPerUser * 10) / 10,
-        conversionRate: Math.round(conversionRate * 10) / 10,
-        viralCoefficient: Math.round(viralCoefficient * 100) / 100,
-        topReferrerEarnings,
-        activeReferralRate: Math.round(activeReferralRate * 10) / 10,
-      })
+    setStats({
+      totalReferrers: referrerCount || 0,
+      totalReferred: referredCount || 0,
+      totalReferralEarnings,
+      avgReferralsPerUser: Math.round(avgReferralsPerUser * 10) / 10,
+      conversionRate: Math.round(conversionRate * 10) / 10,
+      viralCoefficient: Math.round(viralCoefficient * 100) / 100,
+      topReferrerEarnings,
+      activeReferralRate: Math.round(activeReferralRate * 10) / 10,
+    })
+    } catch (error) {
+      console.error('Error loading referral stats:', error)
     }
   }
 
