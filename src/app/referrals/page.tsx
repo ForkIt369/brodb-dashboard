@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = "force-dynamic"
+
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/types/database'
@@ -57,39 +59,66 @@ export default function ReferralsPage() {
 
   async function loadReferralData() {
     try {
+      console.log('Starting to load referral data...')
+      
       await Promise.all([
         loadReferralStats(),
         loadTopReferrers(),
         loadReferralNetworks(),
       ])
+      
+      console.log('Referral data loaded successfully')
     } catch (error) {
       console.error('Error loading referral data:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
     } finally {
       setLoading(false)
     }
   }
 
   async function loadReferralStats() {
-    // Get total referrers (users who have referred someone)
-    const { count: referrerCount } = await supabase
-      .from('referrals')
-      .select('referrer_id', { count: 'exact', head: true })
+    try {
+      console.log('Loading referral stats...')
+      
+      // Get total referrers (users who have referred someone)
+      const { count: referrerCount, error: referrerError } = await supabase
+        .from('referrals')
+        .select('referrer_id', { count: 'exact', head: true })
+        
+      if (referrerError) {
+        console.error('Error fetching referrer count:', referrerError)
+      }
 
-    // Get total referred users
-    const { count: referredCount } = await supabase
-      .from('referrals')
-      .select('referred_id', { count: 'exact', head: true })
+      // Get total referred users
+      const { count: referredCount, error: referredError } = await supabase
+        .from('referrals')
+        .select('referred_id', { count: 'exact', head: true })
+        
+      if (referredError) {
+        console.error('Error fetching referred count:', referredError)
+      }
 
-    // Get total users with referrals_count > 0
-    const { data: referralData } = await supabase
-      .from('user_tiers')
-      .select('referrals_count')
-      .gt('referrals_count', 0)
+      // Get total users with referrals_count > 0
+      const { data: referralData, error: referralDataError } = await supabase
+        .from('user_tiers')
+        .select('referrals_count')
+        .gt('referrals_count', 0)
+        
+      if (referralDataError) {
+        console.error('Error fetching referral data:', referralDataError)
+      }
 
-    // Get referral earnings data
-    const { data: earningsData } = await supabase
-      .from('processed_brofit_earnings')
-      .select('brofit_bits, l2_bits')
+      // Get referral earnings data
+      const { data: earningsData, error: earningsError } = await supabase
+        .from('processed_brofit_earnings')
+        .select('brofit_bits, l2_bits')
+        
+      if (earningsError) {
+        console.error('Error fetching earnings data:', earningsError)
+      }
 
     const totalReferralEarnings = earningsData?.reduce((sum, e) => {
       return sum + (e.brofit_bits || 0) + (e.l2_bits || 0)

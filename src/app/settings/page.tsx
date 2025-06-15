@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = "force-dynamic"
+
 import { useState, useEffect } from 'react'
 import { 
   Settings as SettingsIcon, 
@@ -106,17 +108,40 @@ export default function SettingsPage() {
   ]
 
   useEffect(() => {
-    // Load settings from localStorage
-    const savedSettings = localStorage.getItem('dashboardSettings')
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings))
+    try {
+      console.log('Loading settings from localStorage...')
+      // Load settings from localStorage
+      const savedSettings = localStorage.getItem('dashboardSettings')
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings)
+        console.log('Settings loaded:', parsed)
+        setSettings(parsed)
+      } else {
+        console.log('No saved settings found, using defaults')
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
     }
   }, [])
 
   const handleSave = () => {
-    localStorage.setItem('dashboardSettings', JSON.stringify(settings))
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    try {
+      console.log('Saving settings to localStorage...')
+      localStorage.setItem('dashboardSettings', JSON.stringify(settings))
+      console.log('Settings saved successfully')
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+    }
   }
 
   const handleSettingChange = (key: string, value: any) => {

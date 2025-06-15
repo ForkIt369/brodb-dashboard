@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = "force-dynamic"
+
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, startOfDay, endOfDay } from 'date-fns'
@@ -77,6 +79,8 @@ export default function AnalyticsPage() {
   async function loadAnalytics() {
     setLoading(true)
     try {
+      console.log('Starting to load analytics...')
+      
       await Promise.all([
         loadDailyMetrics(),
         loadSegmentData(),
@@ -84,71 +88,101 @@ export default function AnalyticsPage() {
         loadLevelDistribution(),
         loadSummaryStats(),
       ])
+      
+      console.log('Analytics loaded successfully')
     } catch (error) {
       console.error('Error loading analytics:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
     } finally {
       setLoading(false)
     }
   }
 
   async function loadDailyMetrics() {
-    const metrics: DailyMetric[] = []
-    const start = startOfDay(dateRange[0])
-    const end = endOfDay(dateRange[1])
-    
-    // Generate dates
-    const dates = []
-    let currentDate = new Date(start)
-    while (currentDate <= end) {
-      dates.push(new Date(currentDate))
-      currentDate.setDate(currentDate.getDate() + 1)
+    try {
+      console.log('Loading daily metrics...')
+      
+      const metrics: DailyMetric[] = []
+      const start = startOfDay(dateRange[0])
+      const end = endOfDay(dateRange[1])
+      
+      // Generate dates
+      const dates = []
+      let currentDate = new Date(start)
+      while (currentDate <= end) {
+        dates.push(new Date(currentDate))
+        currentDate.setDate(currentDate.getDate() + 1)
+      }
+
+      for (const date of dates) {
+        const dayStart = startOfDay(date).toISOString()
+        const dayEnd = endOfDay(date).toISOString()
+
+        // Get new users for this day
+        const { count: newUsers, error: newUsersError } = await supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', dayStart)
+          .lt('created_at', dayEnd)
+          
+        if (newUsersError) {
+          console.error('Error fetching new users for', date, newUsersError)
+        }
+
+        // Get active users for this day
+        const { data: activeData, error: activeError } = await supabase
+          .from('raw_earnings')
+          .select('telegram_id')
+          .gte('earned_at', dayStart)
+          .lt('earned_at', dayEnd)
+          
+        if (activeError) {
+          console.error('Error fetching active users for', date, activeError)
+        }
+
+        const activeUsers = new Set(activeData?.map(r => r.telegram_id) || []).size
+
+        // Get bits earned for this day
+        const { data: bitsData, error: bitsError } = await supabase
+          .from('raw_earnings')
+          .select('bits')
+          .gte('earned_at', dayStart)
+          .lt('earned_at', dayEnd)
+          
+        if (bitsError) {
+          console.error('Error fetching bits for', date, bitsError)
+        }
+
+        const totalBits = bitsData?.reduce((sum, r) => sum + (r.bits || 0), 0) || 0
+
+        // Get cumulative users up to this day
+        const { count: totalUsers, error: totalError } = await supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .lt('created_at', dayEnd)
+          
+        if (totalError) {
+          console.error('Error fetching total users for', date, totalError)
+        }
+
+        metrics.push({
+          date: format(date, 'MMM d'),
+          users: totalUsers || 0,
+          activeUsers,
+          bits: totalBits,
+          newUsers: newUsers || 0,
+        })
+      }
+
+      console.log('Daily metrics loaded:', metrics.length, 'days')
+      setDailyMetrics(metrics)
+    } catch (error) {
+      console.error('Error in loadDailyMetrics:', error)
+      throw error
     }
-
-    for (const date of dates) {
-      const dayStart = startOfDay(date).toISOString()
-      const dayEnd = endOfDay(date).toISOString()
-
-      // Get new users for this day
-      const { count: newUsers } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', dayStart)
-        .lt('created_at', dayEnd)
-
-      // Get active users for this day
-      const { data: activeData } = await supabase
-        .from('raw_earnings')
-        .select('telegram_id')
-        .gte('earned_at', dayStart)
-        .lt('earned_at', dayEnd)
-
-      const activeUsers = new Set(activeData?.map(r => r.telegram_id) || []).size
-
-      // Get bits earned for this day
-      const { data: bitsData } = await supabase
-        .from('raw_earnings')
-        .select('bits')
-        .gte('earned_at', dayStart)
-        .lt('earned_at', dayEnd)
-
-      const totalBits = bitsData?.reduce((sum, r) => sum + (r.bits || 0), 0) || 0
-
-      // Get cumulative users up to this day
-      const { count: totalUsers } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .lt('created_at', dayEnd)
-
-      metrics.push({
-        date: format(date, 'MMM d'),
-        users: totalUsers || 0,
-        activeUsers,
-        bits: totalBits,
-        newUsers: newUsers || 0,
-      })
-    }
-
-    setDailyMetrics(metrics)
   }
 
   async function loadSegmentData() {

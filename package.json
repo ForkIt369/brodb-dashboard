@@ -12,6 +12,7 @@
     "@supabase/auth-helpers-nextjs": "^0.8.7",
     "@supabase/supabase-js": "^2.39.1",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.0.0-beta.68",
     "@types/papaparse": "^5.3.16",
     "@types/react-datepicker": "^6.2.0",
     "chart.js": "^4.4.1",
@@ -24,7 +25,9 @@
     "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^8.4.0",
     "react-dom": "^18.2.0",
+    "react-hotkeys-hook": "^5.1.0",
     "recharts": "^2.15.3",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
