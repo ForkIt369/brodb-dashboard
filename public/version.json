@@ -1,10 +1,16 @@
 {
-  "version": "2.0.0",
-  "deployed": "2025-01-14T23:45:00Z",
+  "version": "2.1.0",
+  "deployed": "2025-01-15T00:30:00Z",
   "features": [
-    "Advanced Users Table with Filtering",
-    "Analytics Dashboard with Charts",
-    "Referrals Network Visualization",
-    "Settings Configuration Panel"
+    "Ultra-Advanced Users Table with 20+ Columns",
+    "Column Visibility Toggle System",
+    "Advanced Multi-Criteria Filtering",
+    "Bulk Actions (Export, Message, Tags, Suspend)",
+    "User Details Slide-Over Panel",
+    "Real-time Data with Force Dynamic Rendering",
+    "Error Boundaries and Better Error Handling",
+    "Keyboard Shortcuts (Cmd+F, Cmd+A, Cmd+Shift+E)",
+    "Export to CSV, JSON, and Excel",
+    "Persistent User Preferences"
   ]
 }
